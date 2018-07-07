@@ -30,7 +30,7 @@ public interface RestService {
 
     @POST
     @Path("/say1")
-    @Consumes({MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_JSON})
     String sayHello(String name);
 
 }

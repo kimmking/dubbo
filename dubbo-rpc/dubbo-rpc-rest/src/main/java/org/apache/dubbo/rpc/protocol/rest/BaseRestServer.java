@@ -16,11 +16,18 @@
  */
 package org.apache.dubbo.rpc.protocol.rest;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.support.config.FastJsonConfig;
+import com.alibaba.fastjson.support.jaxrs.FastJsonProvider;
+
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.utils.StringUtils;
 
 import org.jboss.resteasy.spi.ResteasyDeployment;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+
+import java.nio.charset.Charset;
 
 public abstract class BaseRestServer implements RestServer {
 
@@ -32,6 +39,24 @@ public abstract class BaseRestServer implements RestServer {
         getDeployment().getProviderClasses().add(RpcContextFilter.class.getName());
         // TODO users can override this mapper, but we just rely on the current priority strategy of resteasy
         getDeployment().getProviderClasses().add(RpcExceptionMapper.class.getName());
+
+        String serialization = url.getParameter("serialization");
+        if (StringUtils.isNotEmpty(serialization)) {
+            String charset = url.getParameter("charset", "UTF-8");
+            if (serialization.equals("fastjson")) {
+                getDeployment().setRegisterBuiltin(false);
+                getDeployment().getScannedProviderClasses().clear();
+                FastJsonConfig fastJsonConfig = new FastJsonConfig();
+                fastJsonConfig.setSerializerFeatures(SerializerFeature.DisableCircularReferenceDetect);
+                fastJsonConfig.setCharset(Charset.forName(charset));
+                FastJsonProvider jsonProvider = new FastJsonProvider();
+                jsonProvider.setCharset(Charset.forName(charset));
+                jsonProvider.setFastJsonConfig(fastJsonConfig);
+                ResteasyProviderFactory.setRegisterBuiltinByDefault(false);
+                ResteasyProviderFactory.getInstance().register(jsonProvider);
+                getDeployment().setProviderFactory(ResteasyProviderFactory.getInstance());
+            }
+        }
 
         loadProviders(url.getParameter(Constants.EXTENSION_KEY, ""));
 

@@ -110,7 +110,7 @@ public class DubboHttpServer extends BaseRestServer {
 
         @Override
         public String getInitParameter(String s) {
-            return null;
+            return (String) this.servletContext.getAttribute(s);
         }
 
         @Override

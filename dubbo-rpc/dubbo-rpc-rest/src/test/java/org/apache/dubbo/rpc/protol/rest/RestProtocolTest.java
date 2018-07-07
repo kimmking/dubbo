@@ -35,7 +35,7 @@ public class RestProtocolTest {
         ServiceClassHolder.getInstance().pushServiceClass(RestServiceImpl.class);
         RestServiceImpl server = new RestServiceImpl();
         Assert.assertFalse(server.isCalled());
-        URL url = URL.valueOf("rest://127.0.0.1:5342/rest/say1?version=1.0.0");
+        URL url = URL.valueOf("rest://127.0.0.1:5342/rest/say1?version=1.0.0&serialization=fastjson");
         Exporter<RestService> exporter = protocol.export(proxyFactory.getInvoker(server, RestService.class, url));
         Invoker<RestService> invoker = protocol.refer(RestService.class, url);
         RestService client = proxyFactory.getProxy(invoker);
